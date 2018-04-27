@@ -23,8 +23,17 @@ def euclideanDistance(instance_1, instance_2, length):
     distance = math.sqrt(distance)
     return distance
 
+def hammingDistance(instance_1, instance_2, length):
+    distance = 0
+    for i in range(length):
+        i += 1
+        if instance_1[i] != instance_2[i]:
+            distance += 1
+    return distance
+
 def getArgs():
-    if len(sys.argv) != 5:
+    hamming = False;
+    if len(sys.argv) < 5 or len(sys.argv) > 6:
         print("Usage: python main.py filePath kValue training_set random_seed")
         exit(-1)
     try:
@@ -32,6 +41,9 @@ def getArgs():
         kValue = int(sys.argv[2])
         trainingPerc = float(sys.argv[3])
         randomSeed = int(sys.argv[4])
+        if len(sys.argv) == 6:
+            if sys.argv[5] == "H":
+                hamming = True
     except IOError:
         print("Error opening the file " + sys.argv[1])
         exit(-1)
@@ -44,7 +56,7 @@ def getArgs():
         print("Training set percentage is invalid!")
         exit(-1)
 
-    return inFile, kValue, trainingPerc, randomSeed
+    return inFile, kValue, trainingPerc, randomSeed, hamming
 
 def processFile(inFile, randomSeed, trainingPerc):
     random.seed(randomSeed)
@@ -59,11 +71,14 @@ def processFile(inFile, randomSeed, trainingPerc):
             test.append(line.split(","))
     return training, test
 
-def getNeighbors(instance, training, kValue):
+def getNeighbors(instance, training, kValue, hamming):
     distances = []
     length = len(instance) - 1
     for node in training:
-        distance = euclideanDistance(instance, node, length)
+        if not hamming:
+            distance = euclideanDistance(instance, node, length)
+        else:
+            distance = hammingDistance(instance, node, length)
         distances.append((node, distance))
     distances.sort(key=itemgetter(1))
     neighbors = []
@@ -81,7 +96,7 @@ def classify(neighbors):
     return max(classifications.items(), key=operator.itemgetter(1))[0]
 
 def main():
-    inFile, kValue, trainingPerc, randomSeed = getArgs()
+    inFile, kValue, trainingPerc, randomSeed, hamming = getArgs()
     training, test = processFile(inFile, randomSeed, trainingPerc)
     correct = 0
     total = 0
@@ -91,9 +106,10 @@ def main():
     for i in training + test:
         labels.append(i[0])
     labels = list(set(labels))
+    labels.sort()
 
     for node in test:
-        pred = classify(getNeighbors(node, training, kValue))
+        pred = classify(getNeighbors(node, training, kValue, hamming))
         predictions.append(pred)
         true.append(node[0])
         if pred == node[0]:

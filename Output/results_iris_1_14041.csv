@@ -1,4 +1,4 @@
-"Iris-virginica","Iris-setosa","Iris-versicolor"
-10,0,2,"Iris-virginica"
-0,14,0,"Iris-setosa"
-0,0,14,"Iris-versicolor"
+"Iris-setosa","Iris-versicolor","Iris-virginica"
+14,0,0,"Iris-setosa"
+0,14,0,"Iris-versicolor"
+0,2,10,"Iris-virginica"
